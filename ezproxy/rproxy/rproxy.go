@@ -5,7 +5,9 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"github.com/sirupsen/logrus"
+	//"io"
 	"fmt"
+	//"bytes"
 )
 
 type proxy struct {
@@ -36,7 +38,7 @@ func NewProxy(rhost string, rport int, log *logrus.Logger) (*proxy, error) {
 	// Hook requests/responses
 	p.originalDirector = p.Director
 	p.Director = p.hookRequest()
-	p.ModifyResponse = hookResponse
+	p.ModifyResponse = p.hookResponse()
 	p.ErrorHandler = errorHandler
 
 	return p, nil
@@ -57,26 +59,45 @@ func (p *proxy) hookRequest() func(req *http.Request) {
 	* Hook incoming requests, and return the function that modifies them
 	*/
 
-	fmt.Println("hooking requests")
-
 	return func(req *http.Request) {
 		// First, call the original director
 		p.originalDirector(req)
 
-		// Modify the request
+		// Modify/log the request
+		//msg := req.Header.Get("msg")
+		p.log.Info("Request received")
+		p.log.SetFormatter(&logrus.JSONFormatter{})
 		p.log.Info(req)
+		p.log.SetFormatter(&logrus.TextFormatter{})
 
 		return
 	}
 }
 
-func hookResponse(resp *http.Response) error {
+func (p *proxy) hookResponse() func(*http.Response) error {
 	/*
 	* Hook outgoing responses and modify them
 	*/
 
-	fmt.Printf("RESP: %v\n", resp)
-	return nil
+	return func(resp *http.Response) error {
+		// Modify/log the response
+		//buf, err := io.ReadAll(resp.Body)
+        //if err != nil {
+        //    return err
+        //}
+		//rdr1 := io.NopCloser(bytes.NewBuffer(buf))
+		//rdr2 := io.NopCloser(bytes.NewBuffer(buf))
+		//body := String(rdr1)
+		//resp.Body = rdr2
+
+		//msg := resp.Header.Get("User-Agent")
+		p.log.Info("Response received")
+		p.log.SetFormatter(&logrus.JSONFormatter{})
+		p.log.Info(resp)
+		p.log.SetFormatter(&logrus.TextFormatter{})
+
+		return nil
+	}
 }
 
 func errorHandler(rw http.ResponseWriter, req *http.Request, err error) {

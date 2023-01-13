@@ -28,7 +28,7 @@ func main() {
 
 	http.HandleFunc("/", func (rw http.ResponseWriter, req *http.Request) {
 		fmt.Printf("[SERVER] request receieved at: %s\n", time.Now())
-		fmt.Fprint(rw, "Hello!")
+		fmt.Fprint(rw, "Hello!\n")
 	})
 
 	lport := parseArgs()

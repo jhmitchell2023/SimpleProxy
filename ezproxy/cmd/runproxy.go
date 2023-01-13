@@ -42,9 +42,6 @@ func parseArgs() (string, int, int, *logrus.Logger) {
 		}
 	}
 
-	// Set logging format to json
-	log.SetFormatter(&logrus.JSONFormatter{})
-
 	return rhost, rport, lport, log
 }
 
@@ -55,6 +52,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	log.Info("Reverse Proxy running")
 
 	// Register the reverse proxy as the handler for all incoming requests
 	http.HandleFunc("/", rproxy.ProxyRequestHandler(p.ReverseProxy))
